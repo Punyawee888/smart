@@ -14,6 +14,63 @@ const statusDiv = document.getElementById('status');
 const newCardBtn = document.getElementById('newCardBtn');
 const historyList = document.getElementById('historyList');
 let history = [];
+// เก็บสถานะและเวลาสแกนของแต่ละบาร์โค้ด
+const barcodeStatus = {}; // { barcode: { status: 'active'|'inactive', inTime: Date, outTime: Date } }
+
+function calculateParkingFee(inTime, outTime) {
+    let durationMs = outTime - inTime;
+    if (durationMs < 0) durationMs = 0;
+
+    const durationSeconds = Math.ceil(durationMs / 1000); // ปัดขึ้นเป็นวินาที
+
+    return durationSeconds; // 1 วินาที = 1 บาท
+}
+
+
+barcodeInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+        const code = barcodeInput.value.trim();
+        if (!code) return;
+        const now = new Date();
+        let user = users[code];
+        if (!user) {
+            // สร้างข้อมูลผู้ใช้ชั่วคราวสำหรับบาร์โค้ดใหม่
+            user = { name: `Guest (${code})`, online: false, lastScan: null };
+            users[code] = user;
+        }
+        // ตรวจสอบสถานะ
+        if (!barcodeStatus[code] || barcodeStatus[code].status === 'inactive') {
+            // สแกนครั้งแรก
+            barcodeStatus[code] = { status: 'active', inTime: now, outTime: null };
+            user.online = true;
+            user.lastScan = now;
+            userInfo.style.display = 'block';
+            userName.textContent = `ชื่อ: ${user.name}`;
+            userTime.textContent = `เวลาเข้า: ${formatTime(now)}`;
+            statusDiv.style.display = 'block';
+            statusDiv.textContent = 'สถานะ: ถูกใช้งาน';
+            addHistory(`เข้า: ${user.name} (${code}) เวลา ${formatTime(now)}`);
+        } else if (barcodeStatus[code].status === 'active') {
+            // สแกนครั้งที่สอง
+            barcodeStatus[code].status = 'inactive';
+            barcodeStatus[code].outTime = now;
+            user.online = false;
+            user.lastScan = now;
+            const inTime = barcodeStatus[code].inTime;
+            const outTime = now;
+            const fee = calculateParkingFee(inTime, outTime);
+            const durationMs = outTime - inTime;
+            const durationMin = Math.ceil(durationMs / (60 * 1000));
+            userInfo.style.display = 'block';
+            userName.textContent = `ชื่อ: ${user.name}`;
+            userTime.textContent = `เวลาออก: ${formatTime(now)}`;
+            statusDiv.style.display = 'block';
+            statusDiv.textContent = `สถานะ: ปิดการใช้งาน | เวลาจอด ${durationMin} นาที | ค่าจอด ${fee} บาท`;
+            addHistory(`ออก: ${user.name} (${code}) เวลา ${formatTime(now)} | เวลาจอด ${durationMin} นาที | ค่าจอด ${fee} บาท`);
+        }
+        barcodeInput.value = '';
+    }
+});
 
 function formatTime(date) {
     return date.toLocaleString('th-TH', { hour12: false });
@@ -79,3 +136,9 @@ newCardBtn.addEventListener('click', function() {
 });
 
 renderHistory();
+
+document.addEventListener('DOMContentLoaded', () => {
+    const barcodeInput = document.getElementById('barcode');
+    barcodeInput.focus();
+});
+
