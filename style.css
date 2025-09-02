@@ -121,7 +121,7 @@ input[type="text"] {
     font-size: 17px;
     cursor: pointer;
     font-weight: 500;
-    transition: background 0.2s;
+    transition: background 0.3s ease;
     margin-bottom: 10px;
 }
 .btn:hover {
@@ -132,6 +132,9 @@ input[type="text"] {
     border-radius: 10px;
     padding: 14px;
     margin-top: 18px;
+    height: 100%; /* ใช้พื้นที่เต็ม */
+    max-height: 250px;
+    overflow-y: auto;
 }
 .history-title {
     font-size: 15px;
@@ -140,9 +143,13 @@ input[type="text"] {
     margin-bottom: 8px;
 }
 .history-list {
-    list-style: none;
+    max-height: 200px; /* กำหนดความสูงสูงสุด */
+    overflow-y: auto !important; /* อนุญาตให้เลื่อนเฉพาะแนวตั้ง */
     padding: 0;
     margin: 0;
+    list-style: none;
+    border: 1px solid #ccc; /* เพิ่มเส้นขอบเพื่อแยกส่วน */
+    background-color: #f9f9f9; /* เพิ่มสีพื้นหลัง */
 }
 .history-list li {
     font-size: 14px;
@@ -152,4 +159,16 @@ input[type="text"] {
 }
 .history-list li:last-child {
     border-bottom: none;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    height: 100%;
+}
+
+.history-container {
+  max-height: 200px;
+  overflow-y: auto;
 }

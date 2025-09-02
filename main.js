@@ -78,7 +78,7 @@ function formatTime(date) {
 
 function addHistory(text) {
     history.unshift(text);
-    if (history.length > 5) history = history.slice(0, 5);
+    // ไม่ต้องลบประวัติออก
     renderHistory();
 }
 
@@ -141,4 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const barcodeInput = document.getElementById('barcode');
     barcodeInput.focus();
 });
+
+// ตรวจสอบว่าไม่มีการเปลี่ยนแปลง overflow ของ .history-list
+document.querySelector('.history-list').style.overflowY = 'auto';
 
